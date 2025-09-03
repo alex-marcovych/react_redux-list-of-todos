@@ -6,30 +6,16 @@ import { Todo } from "../../types/Todo";
 import classNames from "classnames";
 
 type Props = {
-  todos: Todo[];
+  visibleTodos: Todo[];
 };
 
-export const TodoList: React.FC<Props> = ({ todos }) => {
+export const TodoList: React.FC<Props> = ({ visibleTodos }) => {
   const dispatch = useAppDispatch();
   const modalTodo = useAppSelector(state => state.currentTodo);
-  const { error } = useAppSelector(state => state.todos);
-  const { status, query } = useAppSelector(state => state.filter);
-
-  const visibleTodos = todos.filter(todo => {
-    const matchesQuery = todo.title.includes(query);
-
-    const matchesStatus =
-      status === "all" ||
-      (status === "active" && todo.completed) ||
-      (status === "completed" && !todo.completed);
-
-    return matchesQuery && matchesStatus;
-  });
-
 
   return (
     <>
-      {error && (
+      {visibleTodos.length === 0 && (
         <p className="notification is-warning">
           There are no todos matching current filter criteria
         </p>

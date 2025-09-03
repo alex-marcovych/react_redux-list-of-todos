@@ -1,15 +1,16 @@
 import 'bulma/css/bulma.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 import { Loader, TodoFilter, TodoList, TodoModal } from './components';
-import { useAppDispatch, useAppSelector } from "./app/hooks";
-import { useEffect } from "react";
-import { actions as todosActions } from "./features/todos";
-import { getTodos } from "./api";
+import { useAppDispatch, useAppSelector } from './app/hooks';
+import { useEffect } from 'react';
+import { actions as todosActions } from './features/todos';
+import { getTodos } from './api';
 
 export const App = () => {
   const dispatch = useAppDispatch();
   const { todos, loading } = useAppSelector(state => state.todos);
-  const todo = useAppSelector(state => state.currentTodo);
+  const currentTodo = useAppSelector(state => state.currentTodo);
+  const { status, query } = useAppSelector(state => state.filter);
 
   useEffect(() => {
     dispatch(todosActions.setLoading(true));
@@ -25,6 +26,17 @@ export const App = () => {
       });
   }, []);
 
+  const visibleTodos = todos.filter(todo => {
+    const matchesQuery = todo.title.toLowerCase().includes(query.toLowerCase());
+
+    const matchesStatus =
+      status === 'all' ||
+      (status === 'active' && !todo.completed) ||
+      (status === 'completed' && todo.completed);
+
+    return matchesQuery && matchesStatus;
+  });
+
   return (
     <>
       <div className="section">
@@ -38,13 +50,13 @@ export const App = () => {
 
             <div className="block">
               {loading && <Loader />}
-              <TodoList todos={todos} />
+              <TodoList visibleTodos={visibleTodos} />
             </div>
           </div>
         </div>
       </div>
 
-      {todo ? <TodoModal todo={todo} /> : ''}
+      {currentTodo ? <TodoModal todo={currentTodo} /> : ''}
     </>
   );
 };
